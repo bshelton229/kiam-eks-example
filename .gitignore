@@ -1,0 +1,11 @@
+.terraform
+*.tfstate
+*.tfstate*
+*.swp
+*~
+*.py[cod]
+.idea/
+
+*.auto.tfvars
+backend.tf
+generated/
