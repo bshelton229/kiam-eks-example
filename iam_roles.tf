@@ -143,3 +143,29 @@ EOF
     "aws_iam_role.kiam_workers",
   ]
 }
+
+resource "aws_iam_role_policy" "perm_test" {
+  name = "perm-test"
+  role = "${aws_iam_role.myapp.id}"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:*"
+            ],
+            "Resource": "${aws_ssm_parameter.foo.arn}"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_ssm_parameter" "foo" {
+  name  = "${var.cluster_name}-perm-test"
+  type  = "String"
+  value = "Hello!"
+}
