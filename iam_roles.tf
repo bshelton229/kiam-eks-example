@@ -31,7 +31,7 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSServicePolicy" {
 
 # Workers
 resource "aws_iam_role" "workers" {
-  name_prefix = "${aws_eks_cluster.this.name}"
+  name_prefix = "${aws_eks_cluster.this.name}-workers-"
 
   assume_role_policy = <<EOF
 {
@@ -51,7 +51,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "workers" {
-  name_prefix = "${aws_eks_cluster.this.name}"
+  name_prefix = "${aws_eks_cluster.this.name}-workers-"
   role        = "${aws_iam_role.workers.name}"
 }
 
@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "workers_AmazonEC2ContainerRegistryRea
 
 # Kiam Workers
 resource "aws_iam_role" "kiam_workers" {
-  name_prefix = "${aws_eks_cluster.this.name}"
+  name_prefix = "${aws_eks_cluster.this.name}-kiam-workers-"
 
   assume_role_policy = <<EOF
 {
@@ -92,7 +92,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "kiam_workers" {
-  name_prefix = "${aws_eks_cluster.this.name}"
+  name_prefix = "${aws_eks_cluster.this.name}-kiam-workers-"
   role        = "${aws_iam_role.kiam_workers.name}"
 }
 
@@ -109,4 +109,37 @@ resource "aws_iam_role_policy_attachment" "kiam_workers_AmazonEKS_CNI_Policy" {
 resource "aws_iam_role_policy_attachment" "kiam_workers_AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = "${aws_iam_role.kiam_workers.name}"
+}
+
+resource "aws_iam_role" "myapp" {
+  name_prefix = "${aws_eks_cluster.this.name}-myapp-"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    },
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "${aws_iam_role.kiam_workers.arn}"
+        ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+
+  depends_on = [
+    "aws_iam_role.kiam_workers",
+  ]
 }
