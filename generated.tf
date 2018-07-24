@@ -18,7 +18,8 @@ data "template_file" "aws_auth" {
   template = "${file("./templates/aws-auth.yaml")}"
 
   vars {
-    worker_role_arn = "${aws_iam_role.workers.arn}"
+    worker_arn      = "${aws_iam_role.workers.arn}"
+    kiam_worker_arn = "${aws_iam_role.kiam_workers.arn}"
   }
 }
 
