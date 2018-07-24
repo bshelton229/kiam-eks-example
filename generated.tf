@@ -13,3 +13,16 @@ resource "local_file" "kubeconfig" {
   content  = "${data.template_file.kubeconfig.rendered}"
   filename = "./generated/kubeconfig"
 }
+
+data "template_file" "aws_auth" {
+  template = "${file("./templates/aws-auth.yaml")}"
+
+  vars {
+    worker_role_arn = "${aws_iam_role.workers.arn}"
+  }
+}
+
+resource "local_file" "aws_auth" {
+  content  = "${data.template_file.aws_auth.rendered}"
+  filename = "./generated/aws-auth.yaml"
+}

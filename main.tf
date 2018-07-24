@@ -24,7 +24,17 @@ module "vpc" {
   enable_nat_gateway = true
   single_nat_gateway = true
 
-  tags = {
-    Name = "${var.cluster_name}"
-  }
+  tags = "${map(
+    "Name", "${var.cluster_name}",
+    "kubernetes.io/cluster/${var.cluster_name}", "shared",
+  )}"
+
+  private_subnet_tags = "${map(
+    "kubernetes.io/cluster/${var.cluster_name}", "shared",
+    "kubernetes.io/role/internal-elb", "",
+  )}"
+
+  public_subnet_tags = "${map(
+    "kubernetes.io/cluster/${var.cluster_name}", "shared",
+  )}"
 }
